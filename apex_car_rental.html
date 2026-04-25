@@ -1,0 +1,821 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>APEX RENTALS — Premium Car Rental Service</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;400;600;700&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --gold:#c9a84c;--gold2:#f0d080;--dark:#080a0e;--dark2:#0d1017;--dark3:#141820;
+  --card:#111520;--border:rgba(201,168,76,0.25);--text:#e8e0d0;--muted:#7a7060;
+}
+body{background:var(--dark);color:var(--text);font-family:'Rajdhani',sans-serif;min-height:100vh;overflow-x:hidden}
+
+/* LOADER */
+#loader{position:fixed;inset:0;background:var(--dark);z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;transition:opacity 0.8s}
+#loader.hide{opacity:0;pointer-events:none}
+.loader-logo{font-family:'Orbitron',monospace;font-size:2.5rem;font-weight:900;background:linear-gradient(135deg,var(--gold),var(--gold2),var(--gold));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;letter-spacing:0.3em;margin-bottom:2rem;animation:pulse 1.5s ease-in-out infinite}
+.loader-bar-wrap{width:300px;height:3px;background:rgba(201,168,76,0.15);border-radius:2px;overflow:hidden}
+.loader-bar{height:100%;background:linear-gradient(90deg,var(--gold),var(--gold2));width:0%;animation:load 2s ease forwards}
+.loader-text{margin-top:1rem;font-size:0.8rem;letter-spacing:0.3em;color:var(--muted);animation:blink 1s ease-in-out infinite}
+@keyframes load{0%{width:0%}100%{width:100%}}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.6}}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0.3}}
+
+/* NAVBAR */
+nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:1rem 3rem;background:linear-gradient(180deg,rgba(8,10,14,0.97) 0%,transparent 100%);backdrop-filter:blur(10px);border-bottom:1px solid var(--border)}
+.nav-logo{font-family:'Orbitron',monospace;font-size:1.4rem;font-weight:900;letter-spacing:0.2em;background:linear-gradient(135deg,var(--gold),var(--gold2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.nav-tabs{display:flex;gap:0.3rem;background:rgba(13,16,23,0.8);border:1px solid var(--border);border-radius:50px;padding:0.3rem}
+.tab-btn{padding:0.5rem 1.3rem;border:none;background:transparent;color:var(--muted);font-family:'Rajdhani',sans-serif;font-size:0.85rem;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;border-radius:50px;cursor:pointer;transition:all 0.3s;white-space:nowrap}
+.tab-btn.active{background:linear-gradient(135deg,var(--gold),#a87a30);color:#080a0e;font-weight:700}
+.tab-btn:hover:not(.active){color:var(--gold);background:rgba(201,168,76,0.08)}
+.nav-auth{display:flex;gap:0.8rem;align-items:center}
+.btn-login{padding:0.5rem 1.3rem;border:1px solid var(--gold);background:transparent;color:var(--gold);font-family:'Rajdhani',sans-serif;font-size:0.85rem;font-weight:700;letter-spacing:0.15em;border-radius:4px;cursor:pointer;transition:all 0.3s;text-transform:uppercase}
+.btn-login:hover{background:rgba(201,168,76,0.1)}
+.btn-signup{padding:0.5rem 1.3rem;border:none;background:linear-gradient(135deg,var(--gold),#a87a30);color:#080a0e;font-family:'Rajdhani',sans-serif;font-size:0.85rem;font-weight:700;letter-spacing:0.15em;border-radius:4px;cursor:pointer;transition:all 0.3s;text-transform:uppercase}
+.btn-signup:hover{opacity:0.85;transform:translateY(-1px)}
+
+/* PAGES */
+.page{display:none;min-height:100vh;padding-top:80px}
+.page.active{display:block}
+
+/* HERO */
+#home{position:relative;overflow:hidden;min-height:100vh;display:flex;flex-direction:column}
+.hero-bg{position:absolute;inset:0;background:radial-gradient(ellipse at 30% 50%,rgba(201,168,76,0.06) 0%,transparent 60%),radial-gradient(ellipse at 80% 20%,rgba(201,168,76,0.04) 0%,transparent 50%)}
+.grid-lines{position:absolute;inset:0;background-image:linear-gradient(rgba(201,168,76,0.04) 1px,transparent 1px),linear-gradient(90deg,rgba(201,168,76,0.04) 1px,transparent 1px);background-size:60px 60px}
+.car-scene{width:100%;height:480px;display:flex;align-items:center;justify-content:center;position:relative;margin-top:2rem}
+.car-wrap{position:relative;animation:float 4s ease-in-out infinite}
+@keyframes float{0%,100%{transform:translateY(0) rotateY(0deg)}50%{transform:translateY(-18px) rotateY(4deg)}}
+.car-svg{width:680px;max-width:95vw;filter:drop-shadow(0 30px 60px rgba(201,168,76,0.3)) drop-shadow(0 0 80px rgba(201,168,76,0.15))}
+.car-glow{position:absolute;bottom:-30px;left:50%;transform:translateX(-50%);width:500px;height:40px;background:radial-gradient(ellipse,rgba(201,168,76,0.4) 0%,transparent 70%);border-radius:50%;filter:blur(10px);animation:glow 4s ease-in-out infinite}
+@keyframes glow{0%,100%{opacity:0.6;transform:translateX(-50%) scaleX(1)}50%{opacity:1;transform:translateX(-50%) scaleX(1.15)}}
+.speed-line{position:absolute;left:0;top:50%;height:1px;background:linear-gradient(90deg,transparent,rgba(201,168,76,0.4),transparent);animation:speed 2s ease-out infinite;transform:translateY(-50%);width:0}
+.speed-line:nth-child(2){top:40%;animation-delay:0.3s}
+.speed-line:nth-child(3){top:60%;animation-delay:0.6s}
+@keyframes speed{0%{width:0;left:0;opacity:0}50%{width:200px;opacity:1}100%{width:0;left:calc(100% - 200px);opacity:0}}
+.hero-content{text-align:center;padding:0 2rem;z-index:1;animation:fadeUp 1s ease 0.3s both}
+@keyframes fadeUp{from{opacity:0;transform:translateY(30px)}to{opacity:1;transform:translateY(0)}}
+.hero-label{font-size:0.7rem;letter-spacing:0.5em;color:var(--gold);text-transform:uppercase;margin-bottom:1rem;display:flex;align-items:center;justify-content:center;gap:0.8rem}
+.hero-label::before,.hero-label::after{content:'';width:40px;height:1px;background:var(--gold);opacity:0.5}
+.hero-title{font-family:'Orbitron',monospace;font-size:4rem;font-weight:900;line-height:1;letter-spacing:-0.01em;margin-bottom:1.5rem}
+.hero-title span{background:linear-gradient(135deg,var(--gold),var(--gold2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.hero-sub{font-size:1.1rem;color:var(--muted);letter-spacing:0.05em;margin-bottom:2.5rem;max-width:500px;margin-left:auto;margin-right:auto}
+.hero-btns{display:flex;gap:1rem;justify-content:center;flex-wrap:wrap}
+.btn-primary{padding:0.9rem 2.5rem;background:linear-gradient(135deg,var(--gold),#a87a30);color:#080a0e;font-family:'Orbitron',monospace;font-size:0.75rem;font-weight:700;letter-spacing:0.2em;border:none;border-radius:4px;cursor:pointer;transition:all 0.3s;text-transform:uppercase}
+.btn-primary:hover{transform:translateY(-2px);box-shadow:0 15px 40px rgba(201,168,76,0.4)}
+.btn-outline{padding:0.9rem 2.5rem;background:transparent;color:var(--gold);font-family:'Orbitron',monospace;font-size:0.75rem;font-weight:700;letter-spacing:0.2em;border:1px solid rgba(201,168,76,0.5);border-radius:4px;cursor:pointer;transition:all 0.3s;text-transform:uppercase}
+.btn-outline:hover{background:rgba(201,168,76,0.08);border-color:var(--gold);transform:translateY(-2px)}
+
+/* STATS */
+.stats-bar{display:flex;justify-content:center;gap:0;margin:3rem auto;max-width:700px;border:1px solid var(--border);border-radius:8px;overflow:hidden;background:var(--card)}
+.stat{flex:1;padding:1.5rem;text-align:center;border-right:1px solid var(--border)}
+.stat:last-child{border-right:none}
+.stat-num{font-family:'Orbitron',monospace;font-size:1.8rem;font-weight:700;color:var(--gold);display:block}
+.stat-label{font-size:0.7rem;letter-spacing:0.2em;color:var(--muted);text-transform:uppercase;margin-top:0.3rem}
+
+/* SECTION HEAD */
+.section-head{text-align:center;margin-bottom:3rem}
+.section-tag{font-size:0.7rem;letter-spacing:0.4em;color:var(--gold);text-transform:uppercase;margin-bottom:0.8rem}
+.section-title{font-family:'Orbitron',monospace;font-size:2.2rem;font-weight:700}
+
+/* FLEET */
+#fleet{padding-top:100px;padding-bottom:4rem}
+.car-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(290px,1fr));gap:1.5rem;padding:0 2rem;max-width:1100px;margin:0 auto}
+.car-card{background:var(--card);border:1px solid var(--border);border-radius:12px;overflow:hidden;cursor:pointer;transition:all 0.4s;position:relative}
+.car-card:hover{transform:translateY(-8px);border-color:rgba(201,168,76,0.5);box-shadow:0 20px 60px rgba(201,168,76,0.15)}
+.car-img{width:100%;height:170px;background:linear-gradient(135deg,#0d1017,#1a1f2e);display:flex;align-items:center;justify-content:center;overflow:hidden}
+.car-img svg{width:90%;height:100%;transition:transform 0.4s}
+.car-card:hover .car-img svg{transform:scale(1.08)}
+.car-badge{position:absolute;top:1rem;right:1rem;background:linear-gradient(135deg,var(--gold),#a87a30);color:#080a0e;font-size:0.65rem;font-weight:700;letter-spacing:0.2em;padding:0.3rem 0.8rem;border-radius:50px;text-transform:uppercase}
+.car-info{padding:1.3rem}
+.car-name{font-family:'Orbitron',monospace;font-size:1rem;font-weight:700;margin-bottom:0.3rem}
+.car-type{font-size:0.75rem;color:var(--muted);letter-spacing:0.15em;text-transform:uppercase;margin-bottom:1rem}
+.car-specs{display:flex;gap:1rem;margin-bottom:1.2rem}
+.spec{text-align:center;flex:1}
+.spec-val{font-size:0.85rem;font-weight:700;color:var(--gold);display:block}
+.spec-key{font-size:0.65rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.15em}
+.car-price{display:flex;align-items:center;justify-content:space-between}
+.price{font-family:'Orbitron',monospace;font-size:1.1rem;font-weight:700;color:var(--gold)}
+.price span{font-size:0.65rem;color:var(--muted);font-family:'Rajdhani',sans-serif;font-weight:400}
+.book-btn{padding:0.5rem 1.2rem;background:transparent;border:1px solid rgba(201,168,76,0.4);color:var(--gold);font-family:'Rajdhani',sans-serif;font-size:0.8rem;font-weight:700;letter-spacing:0.15em;border-radius:4px;cursor:pointer;transition:all 0.3s;text-transform:uppercase}
+.book-btn:hover{background:linear-gradient(135deg,var(--gold),#a87a30);color:#080a0e;border-color:transparent}
+
+/* BOOKING */
+#booking{padding-top:100px;padding-bottom:4rem}
+.booking-wrap{max-width:750px;margin:0 auto;padding:0 2rem}
+.form-card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:2.5rem}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.2rem}
+.form-group{display:flex;flex-direction:column;gap:0.5rem}
+.form-group.full{grid-column:1/-1}
+.form-label{font-size:0.7rem;letter-spacing:0.25em;text-transform:uppercase;color:var(--muted)}
+.form-input{background:rgba(255,255,255,0.04);border:1px solid rgba(201,168,76,0.2);border-radius:6px;padding:0.8rem 1rem;color:var(--text);font-family:'Rajdhani',sans-serif;font-size:0.95rem;outline:none;transition:all 0.3s;width:100%}
+.form-input:focus{border-color:var(--gold);background:rgba(201,168,76,0.05);box-shadow:0 0 0 3px rgba(201,168,76,0.08)}
+.form-select{background:#111520;border:1px solid rgba(201,168,76,0.2);border-radius:6px;padding:0.8rem 1rem;color:var(--text);font-family:'Rajdhani',sans-serif;font-size:0.95rem;outline:none;width:100%;cursor:pointer;transition:all 0.3s}
+.form-select:focus{border-color:var(--gold)}
+.submit-btn{width:100%;padding:1rem;margin-top:1.5rem;background:linear-gradient(135deg,var(--gold),#a87a30);border:none;color:#080a0e;font-family:'Orbitron',monospace;font-size:0.8rem;font-weight:700;letter-spacing:0.25em;border-radius:6px;cursor:pointer;transition:all 0.3s;text-transform:uppercase}
+.submit-btn:hover{transform:translateY(-2px);box-shadow:0 15px 40px rgba(201,168,76,0.35)}
+.price-summary{background:rgba(201,168,76,0.05);border:1px solid rgba(201,168,76,0.15);border-radius:8px;padding:1.2rem;margin-top:1.5rem}
+.price-row{display:flex;justify-content:space-between;padding:0.4rem 0;font-size:0.9rem}
+.price-row.total{border-top:1px solid var(--border);margin-top:0.5rem;padding-top:0.8rem;font-family:'Orbitron',monospace;font-weight:700;color:var(--gold)}
+
+/* ABOUT */
+#about{padding-top:100px;padding-bottom:4rem}
+.about-wrap{max-width:1000px;margin:0 auto;padding:0 2rem}
+.about-grid{display:grid;grid-template-columns:1fr 1fr;gap:3rem;align-items:center;margin-bottom:4rem}
+.about-text h2{font-family:'Orbitron',monospace;font-size:2rem;font-weight:700;margin-bottom:1rem;line-height:1.2}
+.about-text h2 em{font-style:normal;color:var(--gold)}
+.about-text p{color:var(--muted);line-height:1.8;margin-bottom:1rem;font-size:0.95rem}
+.features-grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+.feature-box{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:1.2rem;transition:all 0.3s}
+.feature-box:hover{border-color:rgba(201,168,76,0.4);transform:translateY(-3px)}
+.feat-icon{font-size:1.5rem;margin-bottom:0.6rem}
+.feat-title{font-size:0.85rem;font-weight:700;letter-spacing:0.1em;margin-bottom:0.3rem}
+.feat-desc{font-size:0.75rem;color:var(--muted);line-height:1.5}
+
+/* CONTACT */
+#contact{padding-top:100px;padding-bottom:4rem}
+.contact-wrap{max-width:700px;margin:0 auto;padding:0 2rem}
+.contact-info{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-bottom:2rem}
+.contact-box{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:1.3rem;text-align:center;transition:all 0.3s}
+.contact-box:hover{border-color:rgba(201,168,76,0.4)}
+.contact-icon{font-size:1.5rem;margin-bottom:0.6rem}
+.contact-label{font-size:0.7rem;letter-spacing:0.2em;text-transform:uppercase;color:var(--muted);margin-bottom:0.3rem}
+.contact-val{font-size:0.9rem;font-weight:600;color:var(--text)}
+
+/* MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:200;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity 0.3s;backdrop-filter:blur(8px)}
+.modal-overlay.open{opacity:1;pointer-events:all}
+.modal-box{background:var(--dark2);border:1px solid var(--border);border-radius:16px;width:100%;max-width:420px;overflow:hidden;transform:scale(0.9) translateY(20px);transition:all 0.4s;position:relative}
+.modal-overlay.open .modal-box{transform:scale(1) translateY(0)}
+.modal-tabs{display:flex;border-bottom:1px solid var(--border)}
+.modal-tab{flex:1;padding:1rem;text-align:center;cursor:pointer;font-size:0.8rem;font-weight:700;letter-spacing:0.2em;text-transform:uppercase;color:var(--muted);transition:all 0.3s;border:none;background:transparent}
+.modal-tab.active{color:var(--gold);border-bottom:2px solid var(--gold);margin-bottom:-1px;background:rgba(201,168,76,0.04)}
+.modal-body{padding:2rem}
+.modal-title{font-family:'Orbitron',monospace;font-size:1.2rem;font-weight:700;margin-bottom:0.4rem}
+.modal-sub{font-size:0.8rem;color:var(--muted);margin-bottom:1.8rem}
+.modal-form{display:flex;flex-direction:column;gap:1rem}
+.modal-close{position:absolute;top:1rem;right:1rem;width:30px;height:30px;border-radius:50%;border:1px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;font-size:1rem;display:flex;align-items:center;justify-content:center;transition:all 0.3s}
+.modal-close:hover{border-color:var(--gold);color:var(--gold)}
+.divider{display:flex;align-items:center;gap:1rem;color:var(--muted);font-size:0.75rem;letter-spacing:0.15em;margin:0.5rem 0}
+.divider::before,.divider::after{content:'';flex:1;height:1px;background:var(--border)}
+.social-btns{display:grid;grid-template-columns:1fr 1fr;gap:0.7rem}
+.social-btn{padding:0.7rem;background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:0.8rem;font-weight:600;cursor:pointer;transition:all 0.3s;display:flex;align-items:center;justify-content:center;gap:0.5rem;font-family:'Rajdhani',sans-serif}
+.social-btn:hover{border-color:rgba(201,168,76,0.3);background:rgba(201,168,76,0.05)}
+
+/* TOAST */
+.toast{position:fixed;bottom:2rem;right:2rem;background:var(--card);border:1px solid rgba(80,200,120,0.3);border-radius:8px;padding:1rem 1.5rem;display:flex;align-items:center;gap:0.8rem;z-index:300;transform:translateY(100px);opacity:0;transition:all 0.4s}
+.toast.show{transform:translateY(0);opacity:1}
+.toast-icon{width:8px;height:8px;border-radius:50%;background:#50c878;flex-shrink:0}
+.toast-msg{font-size:0.85rem;font-weight:600}
+
+/* REVEAL */
+.reveal{opacity:0;transform:translateY(25px);transition:all 0.7s ease}
+.reveal.visible{opacity:1;transform:translateY(0)}
+
+/* FOOTER */
+footer{background:var(--dark2);border-top:1px solid var(--border);padding:2rem 3rem;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:1rem}
+.footer-logo{font-family:'Orbitron',monospace;font-size:1rem;font-weight:900;letter-spacing:0.2em;background:linear-gradient(135deg,var(--gold),var(--gold2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.footer-copy{font-size:0.75rem;color:var(--muted)}
+.footer-links{display:flex;gap:1.5rem}
+.footer-links a{font-size:0.8rem;color:var(--muted);text-decoration:none;letter-spacing:0.1em;transition:color 0.3s}
+.footer-links a:hover{color:var(--gold)}
+
+/* RESPONSIVE */
+@media(max-width:768px){
+  nav{padding:0.8rem 1rem;flex-wrap:wrap;gap:0.5rem}
+  .nav-tabs{order:3;width:100%;justify-content:center;border-radius:8px;flex-wrap:wrap}
+  .tab-btn{padding:0.4rem 0.9rem;font-size:0.75rem}
+  .hero-title{font-size:2.5rem}
+  .car-svg{width:100%}
+  .about-grid{grid-template-columns:1fr}
+  .form-grid{grid-template-columns:1fr}
+  .contact-info{grid-template-columns:1fr}
+  .features-grid{grid-template-columns:1fr}
+  .stats-bar{flex-wrap:wrap}
+  .stat{min-width:50%}
+  .footer-links{display:none}
+}
+</style>
+</head>
+<body>
+
+<!-- LOADER -->
+<div id="loader">
+  <div class="loader-logo">APEX</div>
+  <div class="loader-bar-wrap"><div class="loader-bar"></div></div>
+  <div class="loader-text">LOADING EXPERIENCE</div>
+</div>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-logo">APEX RENTALS</div>
+  <div class="nav-tabs">
+    <button class="tab-btn active" onclick="showPage('home',this)">Home</button>
+    <button class="tab-btn" onclick="showPage('fleet',this)">Fleet</button>
+    <button class="tab-btn" onclick="showPage('booking',this)">Booking</button>
+    <button class="tab-btn" onclick="showPage('about',this)">About</button>
+    <button class="tab-btn" onclick="showPage('contact',this)">Contact</button>
+  </div>
+  <div class="nav-auth">
+    <button class="btn-login" onclick="openModal('login')">Login</button>
+    <button class="btn-signup" onclick="openModal('signup')">Sign Up</button>
+  </div>
+</nav>
+
+<!-- ===== HOME PAGE ===== -->
+<div id="home" class="page active">
+  <div class="hero-bg"></div>
+  <div class="grid-lines"></div>
+  <div style="position:relative;z-index:1">
+    <div class="hero-content">
+      <div class="hero-label">Pakistan's Premier Car Rental</div>
+      <h1 class="hero-title">DRIVE<br><span>BEYOND</span><br>LIMITS</h1>
+      <p class="hero-sub">Experience the finest collection of luxury and sports vehicles. Elevate every journey you take.</p>
+      <div class="hero-btns">
+        <button class="btn-primary" onclick="showPage('fleet',document.querySelectorAll('.tab-btn')[1])">Explore Fleet</button>
+        <button class="btn-outline" onclick="showPage('booking',document.querySelectorAll('.tab-btn')[2])">Book Now</button>
+      </div>
+    </div>
+
+    <!-- 3D SVG CAR -->
+    <div class="car-scene">
+      <div class="speed-line"></div>
+      <div class="speed-line"></div>
+      <div class="speed-line"></div>
+      <div class="car-wrap">
+        <svg class="car-svg" viewBox="0 0 680 280" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="bodyGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" style="stop-color:#1a1d26"/>
+              <stop offset="40%" style="stop-color:#2a2d3a"/>
+              <stop offset="100%" style="stop-color:#0d0f14"/>
+            </linearGradient>
+            <linearGradient id="topGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" style="stop-color:#22263a"/>
+              <stop offset="100%" style="stop-color:#0a0c12"/>
+            </linearGradient>
+            <linearGradient id="goldGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" style="stop-color:#c9a84c"/>
+              <stop offset="50%" style="stop-color:#f0d080"/>
+              <stop offset="100%" style="stop-color:#a87a30"/>
+            </linearGradient>
+            <radialGradient id="wheelGrad" cx="40%" cy="35%" r="65%">
+              <stop offset="0%" style="stop-color:#444"/>
+              <stop offset="100%" style="stop-color:#111"/>
+            </radialGradient>
+            <filter id="bodyShadow">
+              <feDropShadow dx="0" dy="8" stdDeviation="12" flood-color="rgba(201,168,76,0.2)"/>
+            </filter>
+            <filter id="glow">
+              <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+              <feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge>
+            </filter>
+          </defs>
+
+          <!-- Ground shadow -->
+          <ellipse cx="340" cy="230" rx="260" ry="18" fill="rgba(0,0,0,0.5)"/>
+          <!-- BODY -->
+          <path d="M55,170 L75,80 Q115,38 205,33 L430,28 Q530,30 580,72 L625,128 L645,172 L645,195 Q640,210 620,212 L60,212 Q42,210 40,195 Z" fill="url(#bodyGrad)" filter="url(#bodyShadow)"/>
+          <!-- ROOF -->
+          <path d="M160,170 L185,60 Q210,30 280,25 L410,22 Q480,24 510,55 L545,120 L555,170 Z" fill="url(#topGrad)"/>
+          <!-- WINDSHIELD FRONT -->
+          <path d="M545,125 L513,58 Q490,32 425,27 L415,27 L415,170 L550,170 Z" fill="rgba(120,180,255,0.12)" stroke="rgba(201,168,76,0.3)" stroke-width="1"/>
+          <path d="M520,55 L510,100 L530,80 Z" fill="rgba(255,255,255,0.06)"/>
+          <!-- WINDSHIELD REAR -->
+          <path d="M160,170 L186,65 Q200,38 260,30 L270,30 L270,170 Z" fill="rgba(120,180,255,0.1)" stroke="rgba(201,168,76,0.3)" stroke-width="1"/>
+          <!-- SIDE WINDOWS -->
+          <path d="M270,28 L415,25 L415,170 L270,170 Z" fill="rgba(80,140,220,0.1)" stroke="rgba(201,168,76,0.25)" stroke-width="1"/>
+          <path d="M290,35 L380,33 L375,80 L295,82 Z" fill="rgba(255,255,255,0.04)"/>
+          <!-- GOLD STRIPE -->
+          <path d="M80,155 L625,155" stroke="url(#goldGrad)" stroke-width="2.5" opacity="0.7" filter="url(#glow)"/>
+          <path d="M120,148 L600,148" stroke="url(#goldGrad)" stroke-width="0.8" opacity="0.4"/>
+          <!-- BUMPERS -->
+          <path d="M42,195 Q38,215 50,220 L80,222 L80,208 Z" fill="url(#bodyGrad)"/>
+          <path d="M648,195 Q655,215 642,220 L610,222 L610,208 Z" fill="url(#bodyGrad)"/>
+          <!-- FRONT GRILLE -->
+          <path d="M625,155 L645,155 L645,190 Q640,205 620,210 L600,210 L600,175 Z" fill="#0a0c10"/>
+          <rect x="610" y="168" width="30" height="3" rx="1" fill="url(#goldGrad)" opacity="0.8"/>
+          <rect x="608" y="175" width="32" height="2" rx="1" fill="url(#goldGrad)" opacity="0.5"/>
+          <rect x="611" y="181" width="29" height="2" rx="1" fill="url(#goldGrad)" opacity="0.3"/>
+          <!-- HEADLIGHTS -->
+          <path d="M610,130 L638,148 L638,162 L605,162 L600,145 Z" fill="rgba(200,220,255,0.15)" stroke="rgba(201,168,76,0.5)" stroke-width="1"/>
+          <ellipse cx="620" cy="150" rx="10" ry="7" fill="rgba(200,220,255,0.25)" filter="url(#glow)"/>
+          <path d="M602,147 L634,155" stroke="rgba(201,168,76,0.6)" stroke-width="1.5"/>
+          <path d="M602,152 L634,160" stroke="rgba(200,220,255,0.4)" stroke-width="0.8"/>
+          <!-- TAIL LIGHTS -->
+          <path d="M58,132 L80,160 L80,195 L55,195 Z" fill="rgba(255,50,30,0.15)" stroke="rgba(255,80,60,0.4)" stroke-width="1"/>
+          <rect x="58" y="155" width="20" height="12" rx="2" fill="rgba(255,50,30,0.2)" filter="url(#glow)"/>
+          <!-- DOOR LINES -->
+          <path d="M280,25 L280,207" stroke="rgba(201,168,76,0.2)" stroke-width="1" stroke-dasharray="4,4"/>
+          <path d="M415,25 L415,207" stroke="rgba(201,168,76,0.2)" stroke-width="1" stroke-dasharray="4,4"/>
+          <!-- DOOR HANDLES -->
+          <rect x="308" y="148" width="30" height="5" rx="2" fill="url(#goldGrad)" opacity="0.7"/>
+          <rect x="438" y="148" width="30" height="5" rx="2" fill="url(#goldGrad)" opacity="0.7"/>
+          <!-- HOOD VENTS -->
+          <rect x="575" y="100" width="25" height="2" rx="1" fill="url(#goldGrad)" opacity="0.5"/>
+          <rect x="575" y="106" width="20" height="2" rx="1" fill="url(#goldGrad)" opacity="0.4"/>
+          <rect x="575" y="112" width="23" height="2" rx="1" fill="url(#goldGrad)" opacity="0.3"/>
+          <!-- REAR WHEEL -->
+          <circle cx="160" cy="215" r="48" fill="#0a0a0a" stroke="rgba(201,168,76,0.3)" stroke-width="2"/>
+          <circle cx="160" cy="215" r="35" fill="url(#wheelGrad)"/>
+          <circle cx="160" cy="215" r="14" fill="#1a1a1a" stroke="url(#goldGrad)" stroke-width="1.5"/>
+          <g transform="translate(160,215)">
+            <rect x="-3" y="-34" width="6" height="20" rx="3" fill="url(#goldGrad)" opacity="0.7"/>
+            <rect x="-3" y="-34" width="6" height="20" rx="3" fill="url(#goldGrad)" opacity="0.7" transform="rotate(180)"/>
+            <rect x="-34" y="-3" width="20" height="6" rx="3" fill="url(#goldGrad)" opacity="0.7"/>
+            <rect x="14" y="-3" width="20" height="6" rx="3" fill="url(#goldGrad)" opacity="0.7"/>
+            <rect x="-3" y="-34" width="6" height="20" rx="3" fill="url(#goldGrad)" opacity="0.5" transform="rotate(45)"/>
+            <rect x="-3" y="-34" width="6" height="20" rx="3" fill="url(#goldGrad)" opacity="0.5" transform="rotate(135)"/>
+            <rect x="-3" y="-34" width="6" height="20" rx="3" fill="url(#goldGrad)" opacity="0.5" transform="rotate(225)"/>
+            <rect x="-3" y="-34" width="6" height="20" rx="3" fill="url(#goldGrad)" opacity="0.5" transform="rotate(315)"/>
+          </g>
+          <circle cx="160" cy="215" r="5" fill="url(#goldGrad)"/>
+          <!-- FRONT WHEEL -->
+          <circle cx="530" cy="215" r="48" fill="#0a0a0a" stroke="rgba(201,168,76,0.3)" stroke-width="2"/>
+          <circle cx="530" cy="215" r="35" fill="url(#wheelGrad)"/>
+          <circle cx="530" cy="215" r="14" fill="#1a1a1a" stroke="url(#goldGrad)" stroke-width="1.5"/>
+          <g transform="translate(530,215)">
+            <rect x="-3" y="-34" width="6" height="20" rx="3" fill="url(#goldGrad)" opacity="0.7"/>
+            <rect x="-3" y="-34" width="6" height="20" rx="3" fill="url(#goldGrad)" opacity="0.7" transform="rotate(180)"/>
+            <rect x="-34" y="-3" width="20" height="6" rx="3" fill="url(#goldGrad)" opacity="0.7"/>
+            <rect x="14" y="-3" width="20" height="6" rx="3" fill="url(#goldGrad)" opacity="0.7"/>
+            <rect x="-3" y="-34" width="6" height="20" rx="3" fill="url(#goldGrad)" opacity="0.5" transform="rotate(45)"/>
+            <rect x="-3" y="-34" width="6" height="20" rx="3" fill="url(#goldGrad)" opacity="0.5" transform="rotate(135)"/>
+            <rect x="-3" y="-34" width="6" height="20" rx="3" fill="url(#goldGrad)" opacity="0.5" transform="rotate(225)"/>
+            <rect x="-3" y="-34" width="6" height="20" rx="3" fill="url(#goldGrad)" opacity="0.5" transform="rotate(315)"/>
+          </g>
+          <circle cx="530" cy="215" r="5" fill="url(#goldGrad)"/>
+          <!-- EXHAUST -->
+          <rect x="55" y="202" width="20" height="6" rx="3" fill="#1a1a1a" stroke="rgba(201,168,76,0.3)" stroke-width="1"/>
+          <!-- BRAND BADGE -->
+          <polygon points="340,85 355,100 340,115 325,100" fill="none" stroke="url(#goldGrad)" stroke-width="1.5" opacity="0.6"/>
+          <text x="340" y="104" text-anchor="middle" font-family="Orbitron,monospace" font-size="8" fill="#c9a84c" font-weight="700">A</text>
+        </svg>
+        <div class="car-glow"></div>
+      </div>
+    </div>
+
+    <div class="stats-bar reveal">
+      <div class="stat"><span class="stat-num">150+</span><div class="stat-label">Luxury Cars</div></div>
+      <div class="stat"><span class="stat-num">24/7</span><div class="stat-label">Support</div></div>
+      <div class="stat"><span class="stat-num">50K+</span><div class="stat-label">Happy Clients</div></div>
+      <div class="stat"><span class="stat-num">15+</span><div class="stat-label">City Locations</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== FLEET PAGE ===== -->
+<div id="fleet" class="page">
+  <div class="section-head">
+    <div class="section-tag">Our Collection</div>
+    <h2 class="section-title">SELECT YOUR RIDE</h2>
+  </div>
+  <div class="car-grid">
+    <!-- Card 1 -->
+    <div class="car-card reveal" style="animation-delay:0.1s">
+      <div class="car-badge">Hot</div>
+      <div class="car-img">
+        <svg viewBox="0 0 300 130" xmlns="http://www.w3.org/2000/svg">
+          <defs><linearGradient id="g1" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#1e2235"/><stop offset="100%" stop-color="#0a0c14"/></linearGradient><linearGradient id="gd1" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#c9a84c"/><stop offset="100%" stop-color="#f0d080"/></linearGradient></defs>
+          <ellipse cx="150" cy="118" rx="120" ry="8" fill="rgba(0,0,0,0.4)"/>
+          <path d="M25,80 L38,38 Q55,18 95,15 L195,12 Q240,13 260,35 L275,65 L280,82 L280,95 L22,95 Z" fill="url(#g1)"/>
+          <path d="M75,80 L88,28 Q100,14 130,11 L185,10 Q220,11 235,30 L248,65 L252,80 Z" fill="rgba(15,18,28,0.8)"/>
+          <path d="M25,73 L280,73" stroke="url(#gd1)" stroke-width="1.5" opacity="0.7"/>
+          <circle cx="72" cy="100" r="22" fill="#0a0a0a" stroke="rgba(201,168,76,0.3)" stroke-width="1.5"/>
+          <circle cx="72" cy="100" r="14" fill="#1a1a1a"/><circle cx="72" cy="100" r="5" fill="url(#gd1)"/>
+          <circle cx="228" cy="100" r="22" fill="#0a0a0a" stroke="rgba(201,168,76,0.3)" stroke-width="1.5"/>
+          <circle cx="228" cy="100" r="14" fill="#1a1a1a"/><circle cx="228" cy="100" r="5" fill="url(#gd1)"/>
+        </svg>
+      </div>
+      <div class="car-info">
+        <div class="car-name">Lamborghini Huracán</div>
+        <div class="car-type">Super Sports</div>
+        <div class="car-specs">
+          <div class="spec"><span class="spec-val">640hp</span><span class="spec-key">Power</span></div>
+          <div class="spec"><span class="spec-val">2.9s</span><span class="spec-key">0-100</span></div>
+          <div class="spec"><span class="spec-val">5 ★</span><span class="spec-key">Rating</span></div>
+        </div>
+        <div class="car-price"><div class="price">Rs. 85,000<span>/day</span></div><button class="book-btn" onclick="showPage('booking',document.querySelectorAll('.tab-btn')[2])">Book</button></div>
+      </div>
+    </div>
+    <!-- Card 2 -->
+    <div class="car-card reveal" style="animation-delay:0.2s">
+      <div class="car-badge">Premium</div>
+      <div class="car-img">
+        <svg viewBox="0 0 300 130" xmlns="http://www.w3.org/2000/svg">
+          <defs><linearGradient id="g2" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#1a1e2e"/><stop offset="100%" stop-color="#0e1018"/></linearGradient><linearGradient id="gd2" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#c9a84c"/><stop offset="100%" stop-color="#f0d080"/></linearGradient></defs>
+          <ellipse cx="150" cy="118" rx="120" ry="8" fill="rgba(0,0,0,0.4)"/>
+          <path d="M20,82 L42,42 Q62,20 105,18 L200,15 Q248,16 265,42 L278,72 L280,85 L280,96 L18,96 Z" fill="url(#g2)"/>
+          <path d="M80,82 L96,35 Q112,18 145,14 L185,13 Q225,14 242,38 L255,72 L258,82 Z" fill="rgba(12,15,22,0.9)"/>
+          <path d="M20,74 L280,74" stroke="url(#gd2)" stroke-width="1.5" opacity="0.7"/>
+          <circle cx="75" cy="100" r="22" fill="#0a0a0a" stroke="rgba(201,168,76,0.3)" stroke-width="1.5"/>
+          <circle cx="75" cy="100" r="14" fill="#1a1a1a"/><circle cx="75" cy="100" r="5" fill="url(#gd2)"/>
+          <circle cx="225" cy="100" r="22" fill="#0a0a0a" stroke="rgba(201,168,76,0.3)" stroke-width="1.5"/>
+          <circle cx="225" cy="100" r="14" fill="#1a1a1a"/><circle cx="225" cy="100" r="5" fill="url(#gd2)"/>
+        </svg>
+      </div>
+      <div class="car-info">
+        <div class="car-name">Rolls-Royce Ghost</div>
+        <div class="car-type">Ultra Luxury</div>
+        <div class="car-specs">
+          <div class="spec"><span class="spec-val">563hp</span><span class="spec-key">Power</span></div>
+          <div class="spec"><span class="spec-val">4.8s</span><span class="spec-key">0-100</span></div>
+          <div class="spec"><span class="spec-val">5 ★</span><span class="spec-key">Rating</span></div>
+        </div>
+        <div class="car-price"><div class="price">Rs. 120,000<span>/day</span></div><button class="book-btn" onclick="showPage('booking',document.querySelectorAll('.tab-btn')[2])">Book</button></div>
+      </div>
+    </div>
+    <!-- Card 3 -->
+    <div class="car-card reveal" style="animation-delay:0.3s">
+      <div class="car-badge">New</div>
+      <div class="car-img">
+        <svg viewBox="0 0 300 130" xmlns="http://www.w3.org/2000/svg">
+          <defs><linearGradient id="g3" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#202538"/><stop offset="100%" stop-color="#0d0f18"/></linearGradient><linearGradient id="gd3" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#c9a84c"/><stop offset="100%" stop-color="#f0d080"/></linearGradient></defs>
+          <ellipse cx="150" cy="118" rx="120" ry="8" fill="rgba(0,0,0,0.4)"/>
+          <path d="M30,82 L50,48 Q68,25 108,22 L205,18 Q250,20 265,48 L278,78 L280,88 L280,96 L28,96 Z" fill="url(#g3)"/>
+          <path d="M90,82 L105,40 Q120,22 150,18 L180,17 Q215,19 228,42 L242,74 L245,82 Z" fill="rgba(10,12,20,0.9)"/>
+          <path d="M30,75 L278,75" stroke="url(#gd3)" stroke-width="1.5" opacity="0.7"/>
+          <circle cx="80" cy="100" r="22" fill="#0a0a0a" stroke="rgba(201,168,76,0.3)" stroke-width="1.5"/>
+          <circle cx="80" cy="100" r="14" fill="#1a1a1a"/><circle cx="80" cy="100" r="5" fill="url(#gd3)"/>
+          <circle cx="222" cy="100" r="22" fill="#0a0a0a" stroke="rgba(201,168,76,0.3)" stroke-width="1.5"/>
+          <circle cx="222" cy="100" r="14" fill="#1a1a1a"/><circle cx="222" cy="100" r="5" fill="url(#gd3)"/>
+        </svg>
+      </div>
+      <div class="car-info">
+        <div class="car-name">Porsche 911 GT3</div>
+        <div class="car-type">Sports Coupe</div>
+        <div class="car-specs">
+          <div class="spec"><span class="spec-val">510hp</span><span class="spec-key">Power</span></div>
+          <div class="spec"><span class="spec-val">3.4s</span><span class="spec-key">0-100</span></div>
+          <div class="spec"><span class="spec-val">5 ★</span><span class="spec-key">Rating</span></div>
+        </div>
+        <div class="car-price"><div class="price">Rs. 65,000<span>/day</span></div><button class="book-btn" onclick="showPage('booking',document.querySelectorAll('.tab-btn')[2])">Book</button></div>
+      </div>
+    </div>
+    <!-- Card 4 -->
+    <div class="car-card reveal" style="animation-delay:0.4s">
+      <div class="car-img">
+        <svg viewBox="0 0 300 130" xmlns="http://www.w3.org/2000/svg">
+          <defs><linearGradient id="g4" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#181b2a"/><stop offset="100%" stop-color="#0b0d14"/></linearGradient><linearGradient id="gd4" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#c9a84c"/><stop offset="100%" stop-color="#f0d080"/></linearGradient></defs>
+          <ellipse cx="150" cy="118" rx="120" ry="8" fill="rgba(0,0,0,0.4)"/>
+          <path d="M15,85 L40,50 Q58,28 100,25 L205,22 Q252,24 268,52 L278,80 L280,90 L280,97 L13,97 Z" fill="url(#g4)"/>
+          <path d="M70,85 L88,45 Q105,25 138,21 L175,20 Q215,22 232,46 L248,80 L250,85 Z" fill="rgba(8,10,18,0.95)"/>
+          <path d="M15,78 L278,78" stroke="url(#gd4)" stroke-width="1.5" opacity="0.7"/>
+          <circle cx="68" cy="101" r="22" fill="#0a0a0a" stroke="rgba(201,168,76,0.3)" stroke-width="1.5"/>
+          <circle cx="68" cy="101" r="14" fill="#1a1a1a"/><circle cx="68" cy="101" r="5" fill="url(#gd4)"/>
+          <circle cx="228" cy="101" r="22" fill="#0a0a0a" stroke="rgba(201,168,76,0.3)" stroke-width="1.5"/>
+          <circle cx="228" cy="101" r="14" fill="#1a1a1a"/><circle cx="228" cy="101" r="5" fill="url(#gd4)"/>
+        </svg>
+      </div>
+      <div class="car-info">
+        <div class="car-name">BMW M8 Competition</div>
+        <div class="car-type">Grand Tourer</div>
+        <div class="car-specs">
+          <div class="spec"><span class="spec-val">625hp</span><span class="spec-key">Power</span></div>
+          <div class="spec"><span class="spec-val">3.2s</span><span class="spec-key">0-100</span></div>
+          <div class="spec"><span class="spec-val">4.8 ★</span><span class="spec-key">Rating</span></div>
+        </div>
+        <div class="car-price"><div class="price">Rs. 55,000<span>/day</span></div><button class="book-btn" onclick="showPage('booking',document.querySelectorAll('.tab-btn')[2])">Book</button></div>
+      </div>
+    </div>
+    <!-- Card 5 -->
+    <div class="car-card reveal" style="animation-delay:0.5s">
+      <div class="car-img">
+        <svg viewBox="0 0 300 130" xmlns="http://www.w3.org/2000/svg">
+          <defs><linearGradient id="g5" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#1c1f30"/><stop offset="100%" stop-color="#0c0e17"/></linearGradient><linearGradient id="gd5" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#c9a84c"/><stop offset="100%" stop-color="#f0d080"/></linearGradient></defs>
+          <ellipse cx="150" cy="118" rx="115" ry="8" fill="rgba(0,0,0,0.4)"/>
+          <path d="M28,83 L48,48 Q65,28 105,24 L200,21 Q248,23 263,50 L275,78 L278,86 L278,96 L26,96 Z" fill="url(#g5)"/>
+          <path d="M82,83 L98,40 Q115,22 148,18 L175,17 Q212,19 228,42 L240,76 L242,83 Z" fill="rgba(10,12,20,0.9)"/>
+          <path d="M28,76 L276,76" stroke="url(#gd5)" stroke-width="1.5" opacity="0.7"/>
+          <circle cx="76" cy="100" r="22" fill="#0a0a0a" stroke="rgba(201,168,76,0.3)" stroke-width="1.5"/>
+          <circle cx="76" cy="100" r="14" fill="#1a1a1a"/><circle cx="76" cy="100" r="5" fill="url(#gd5)"/>
+          <circle cx="224" cy="100" r="22" fill="#0a0a0a" stroke="rgba(201,168,76,0.3)" stroke-width="1.5"/>
+          <circle cx="224" cy="100" r="14" fill="#1a1a1a"/><circle cx="224" cy="100" r="5" fill="url(#gd5)"/>
+        </svg>
+      </div>
+      <div class="car-info">
+        <div class="car-name">Mercedes AMG GT</div>
+        <div class="car-type">Sports Convertible</div>
+        <div class="car-specs">
+          <div class="spec"><span class="spec-val">577hp</span><span class="spec-key">Power</span></div>
+          <div class="spec"><span class="spec-val">3.5s</span><span class="spec-key">0-100</span></div>
+          <div class="spec"><span class="spec-val">4.9 ★</span><span class="spec-key">Rating</span></div>
+        </div>
+        <div class="car-price"><div class="price">Rs. 70,000<span>/day</span></div><button class="book-btn" onclick="showPage('booking',document.querySelectorAll('.tab-btn')[2])">Book</button></div>
+      </div>
+    </div>
+    <!-- Card 6 -->
+    <div class="car-card reveal" style="animation-delay:0.6s">
+      <div class="car-img">
+        <svg viewBox="0 0 300 130" xmlns="http://www.w3.org/2000/svg">
+          <defs><linearGradient id="g6" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#1e1822"/><stop offset="100%" stop-color="#0d0a10"/></linearGradient><linearGradient id="gd6" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#c9a84c"/><stop offset="100%" stop-color="#f0d080"/></linearGradient></defs>
+          <ellipse cx="150" cy="118" rx="115" ry="8" fill="rgba(0,0,0,0.4)"/>
+          <path d="M22,82 L42,44 Q62,22 102,19 L202,16 Q250,18 265,46 L277,76 L280,85 L280,95 L20,95 Z" fill="url(#g6)"/>
+          <path d="M78,82 L94,36 Q110,18 144,14 L178,13 Q218,15 234,40 L246,74 L248,82 Z" fill="rgba(10,8,14,0.95)"/>
+          <path d="M22,74 L278,74" stroke="url(#gd6)" stroke-width="1.5" opacity="0.7"/>
+          <circle cx="72" cy="99" r="22" fill="#0a0a0a" stroke="rgba(201,168,76,0.3)" stroke-width="1.5"/>
+          <circle cx="72" cy="99" r="14" fill="#1a1a1a"/><circle cx="72" cy="99" r="5" fill="url(#gd6)"/>
+          <circle cx="226" cy="99" r="22" fill="#0a0a0a" stroke="rgba(201,168,76,0.3)" stroke-width="1.5"/>
+          <circle cx="226" cy="99" r="14" fill="#1a1a1a"/><circle cx="226" cy="99" r="5" fill="url(#gd6)"/>
+        </svg>
+      </div>
+      <div class="car-info">
+        <div class="car-name">Ferrari Roma</div>
+        <div class="car-type">Italian GT</div>
+        <div class="car-specs">
+          <div class="spec"><span class="spec-val">612hp</span><span class="spec-key">Power</span></div>
+          <div class="spec"><span class="spec-val">3.4s</span><span class="spec-key">0-100</span></div>
+          <div class="spec"><span class="spec-val">5 ★</span><span class="spec-key">Rating</span></div>
+        </div>
+        <div class="car-price"><div class="price">Rs. 95,000<span>/day</span></div><button class="book-btn" onclick="showPage('booking',document.querySelectorAll('.tab-btn')[2])">Book</button></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== BOOKING PAGE ===== -->
+<div id="booking" class="page">
+  <div class="section-head">
+    <div class="section-tag">Reserve Now</div>
+    <h2 class="section-title">BOOK YOUR CAR</h2>
+  </div>
+  <div class="booking-wrap">
+    <div class="form-card">
+      <div class="form-grid">
+        <div class="form-group full">
+          <label class="form-label">Select Vehicle</label>
+          <select class="form-select" id="vehicle" onchange="calcPrice()">
+            <option>Lamborghini Huracán — Rs. 85,000/day</option>
+            <option>Rolls-Royce Ghost — Rs. 120,000/day</option>
+            <option>Porsche 911 GT3 — Rs. 65,000/day</option>
+            <option>BMW M8 Competition — Rs. 55,000/day</option>
+            <option>Mercedes AMG GT — Rs. 70,000/day</option>
+            <option>Ferrari Roma — Rs. 95,000/day</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Full Name</label>
+          <input class="form-input" type="text" placeholder="Ahmed Raza">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Phone Number</label>
+          <input class="form-input" type="tel" placeholder="+92 300 0000000">
+        </div>
+        <div class="form-group">
+          <label class="form-label">CNIC / Passport No.</label>
+          <input class="form-input" type="text" placeholder="35201-XXXXXXX-X">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Driver's License No.</label>
+          <input class="form-input" type="text" placeholder="License Number">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Pickup Date</label>
+          <input class="form-input" type="date" id="pickup" onchange="calcPrice()">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Return Date</label>
+          <input class="form-input" type="date" id="dropoff" onchange="calcPrice()">
+        </div>
+        <div class="form-group full">
+          <label class="form-label">Pickup Location</label>
+          <select class="form-select">
+            <option>Lahore — Liberty Market Hub</option>
+            <option>Karachi — Clifton Branch</option>
+            <option>Islamabad — Blue Area Office</option>
+            <option>Rawalpindi — Saddar Branch</option>
+          </select>
+        </div>
+        <div class="form-group full">
+          <label class="form-label">Add-ons</label>
+          <select class="form-select">
+            <option>No add-ons</option>
+            <option>Professional Driver (+Rs. 5,000/day)</option>
+            <option>GPS Navigation (+Rs. 1,000/day)</option>
+            <option>Child Safety Seat (+Rs. 500/day)</option>
+            <option>Full Insurance Package (+Rs. 3,000/day)</option>
+          </select>
+        </div>
+        <div class="form-group full">
+          <label class="form-label">Special Requests</label>
+          <textarea class="form-input" rows="3" placeholder="Any special instructions or requirements..." style="resize:none"></textarea>
+        </div>
+      </div>
+      <div class="price-summary">
+        <div class="price-row"><span>Daily Rate</span><span id="daily">Rs. 85,000</span></div>
+        <div class="price-row"><span>Duration</span><span id="days">1 day</span></div>
+        <div class="price-row"><span>Insurance & Service Fee</span><span>Rs. 5,000</span></div>
+        <div class="price-row total"><span>TOTAL</span><span id="total">Rs. 90,000</span></div>
+      </div>
+      <button class="submit-btn" onclick="submitBooking()">CONFIRM BOOKING</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== ABOUT PAGE ===== -->
+<div id="about" class="page">
+  <div class="about-wrap">
+    <div class="about-grid reveal">
+      <div class="about-text">
+        <div class="section-tag">Our Story</div>
+        <h2>REDEFINING<br>LUXURY <em>MOBILITY</em></h2>
+        <p>Founded in 2010, APEX Rentals has been Pakistan's most trusted name in premium car rental services. We believe that how you travel defines the experience.</p>
+        <p>From high-octane supercars to ultra-refined luxury sedans, every vehicle in our fleet is meticulously maintained to deliver peak performance and elegance.</p>
+        <p>With locations across Lahore, Karachi, Islamabad, and Rawalpindi, we are always close to you — ready to elevate your journey.</p>
+        <div style="display:flex;gap:1rem;margin-top:1.5rem;flex-wrap:wrap">
+          <button class="btn-primary" onclick="showPage('fleet',document.querySelectorAll('.tab-btn')[1])">View Fleet</button>
+          <button class="btn-outline" onclick="showPage('booking',document.querySelectorAll('.tab-btn')[2])">Book Now</button>
+        </div>
+      </div>
+      <div class="features-grid">
+        <div class="feature-box"><div class="feat-icon">🏎</div><div class="feat-title">Top Models</div><div class="feat-desc">Only the latest and finest vehicles from the world's best brands</div></div>
+        <div class="feature-box"><div class="feat-icon">🛡</div><div class="feat-title">Fully Insured</div><div class="feat-desc">Complete coverage and peace of mind on every journey</div></div>
+        <div class="feature-box"><div class="feat-icon">🚀</div><div class="feat-title">Instant Booking</div><div class="feat-desc">Reserve in under 60 seconds with instant confirmation</div></div>
+        <div class="feature-box"><div class="feat-icon">🔧</div><div class="feat-title">24/7 Support</div><div class="feat-desc">Our team is always ready to assist you on the road</div></div>
+        <div class="feature-box"><div class="feat-icon">📍</div><div class="feat-title">4 Cities</div><div class="feat-desc">Convenient pickup and drop-off across major cities</div></div>
+        <div class="feature-box"><div class="feat-icon">💎</div><div class="feat-title">VIP Treatment</div><div class="feat-desc">White-glove service for every APEX customer</div></div>
+      </div>
+    </div>
+    <div class="stats-bar reveal">
+      <div class="stat"><span class="stat-num">2010</span><div class="stat-label">Est. Year</div></div>
+      <div class="stat"><span class="stat-num">4+</span><div class="stat-label">Cities</div></div>
+      <div class="stat"><span class="stat-num">98%</span><div class="stat-label">Satisfaction</div></div>
+      <div class="stat"><span class="stat-num">0</span><div class="stat-label">Compromises</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== CONTACT PAGE ===== -->
+<div id="contact" class="page">
+  <div class="section-head">
+    <div class="section-tag">Get In Touch</div>
+    <h2 class="section-title">CONTACT US</h2>
+  </div>
+  <div class="contact-wrap">
+    <div class="contact-info reveal">
+      <div class="contact-box">
+        <div class="contact-icon">📍</div>
+        <div class="contact-label">Head Office</div>
+        <div class="contact-val">Saddar, Rawalpindi, Punjab</div>
+      </div>
+      <div class="contact-box">
+        <div class="contact-icon">📞</div>
+        <div class="contact-label">Phone / WhatsApp</div>
+        <div class="contact-val">+92 51 000 0000</div>
+      </div>
+      <div class="contact-box">
+        <div class="contact-icon">✉️</div>
+        <div class="contact-label">Email</div>
+        <div class="contact-val">info@apexrentals.pk</div>
+      </div>
+    </div>
+    <div class="form-card reveal">
+      <div class="form-grid">
+        <div class="form-group"><label class="form-label">Name</label><input class="form-input" type="text" placeholder="Your full name"></div>
+        <div class="form-group"><label class="form-label">Email</label><input class="form-input" type="email" placeholder="your@email.com"></div>
+        <div class="form-group"><label class="form-label">Phone</label><input class="form-input" type="tel" placeholder="+92 300 0000000"></div>
+        <div class="form-group"><label class="form-label">Subject</label><input class="form-input" type="text" placeholder="Inquiry about..."></div>
+        <div class="form-group full"><label class="form-label">Message</label><textarea class="form-input" rows="5" placeholder="Write your message here..." style="resize:none"></textarea></div>
+      </div>
+      <button class="submit-btn" onclick="submitContact()">SEND MESSAGE</button>
+    </div>
+  </div>
+</div>
+
+<!-- LOGIN MODAL -->
+<div class="modal-overlay" id="modal" onclick="closeModalOutside(event)">
+  <div class="modal-box">
+    <button class="modal-close" onclick="closeModal()">✕</button>
+    <div class="modal-tabs">
+      <button class="modal-tab active" id="tab-login" onclick="switchTab('login')">Login</button>
+      <button class="modal-tab" id="tab-signup" onclick="switchTab('signup')">Sign Up</button>
+    </div>
+    <div class="modal-body">
+      <!-- LOGIN FORM -->
+      <div id="form-login">
+        <div class="modal-title">Welcome Back</div>
+        <div class="modal-sub">Sign in to manage your reservations</div>
+        <div class="modal-form">
+          <div class="form-group"><label class="form-label">Email</label><input class="form-input" type="email" placeholder="ahmed@example.com"></div>
+          <div class="form-group"><label class="form-label">Password</label><input class="form-input" type="password" placeholder="••••••••"></div>
+          <div style="text-align:right;margin-top:-0.5rem"><span style="font-size:0.8rem;color:var(--gold);cursor:pointer">Forgot password?</span></div>
+          <button class="submit-btn" style="margin-top:0.5rem" onclick="doLogin()">SIGN IN</button>
+          <div class="divider">or continue with</div>
+          <div class="social-btns">
+            <button class="social-btn">G&nbsp;&nbsp;Google</button>
+            <button class="social-btn">f&nbsp;&nbsp;Facebook</button>
+          </div>
+        </div>
+      </div>
+      <!-- SIGNUP FORM -->
+      <div id="form-signup" style="display:none">
+        <div class="modal-title">Create Account</div>
+        <div class="modal-sub">Join APEX and drive in style</div>
+        <div class="modal-form">
+          <div class="form-group"><label class="form-label">Full Name</label><input class="form-input" type="text" placeholder="Ahmed Raza"></div>
+          <div class="form-group"><label class="form-label">Email</label><input class="form-input" type="email" placeholder="ahmed@example.com"></div>
+          <div class="form-group"><label class="form-label">Phone</label><input class="form-input" type="tel" placeholder="+92 300 0000000"></div>
+          <div class="form-group"><label class="form-label">Password</label><input class="form-input" type="password" placeholder="Min 8 characters"></div>
+          <div class="form-group"><label class="form-label">Confirm Password</label><input class="form-input" type="password" placeholder="Re-enter password"></div>
+          <button class="submit-btn" style="margin-top:0.5rem" onclick="doSignup()">CREATE ACCOUNT</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST NOTIFICATION -->
+<div class="toast" id="toast">
+  <div class="toast-icon"></div>
+  <span class="toast-msg" id="toast-msg">Action completed!</span>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-logo">APEX RENTALS</div>
+  <div class="footer-copy">&copy; 2025 APEX Rentals Pakistan. All rights reserved.</div>
+  <div class="footer-links">
+    <a href="#">Privacy Policy</a>
+    <a href="#">Terms of Use</a>
+    <a href="#">Careers</a>
+  </div>
+</footer>
+
+<script>
+// LOADER
+window.addEventListener('load', () => {
+  setTimeout(() => {
+    document.getElementById('loader').classList.add('hide');
+    initReveal();
+  }, 2200);
+});
+
+// PAGE NAV
+function showPage(id, btn) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+  setTimeout(initReveal, 100);
+}
+
+// MODAL
+function openModal(type) { document.getElementById('modal').classList.add('open'); switchTab(type); }
+function closeModal() { document.getElementById('modal').classList.remove('open'); }
+function closeModalOutside(e) { if (e.target === document.getElementById('modal')) closeModal(); }
+function switchTab(tab) {
+  document.getElementById('form-login').style.display = tab === 'login' ? 'block' : 'none';
+  document.getElementById('form-signup').style.display = tab === 'signup' ? 'block' : 'none';
+  document.getElementById('tab-login').classList.toggle('active', tab === 'login');
+  document.getElementById('tab-signup').classList.toggle('active', tab === 'signup');
+}
+
+// TOAST
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  document.getElementById('toast-msg').textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3500);
+}
+
+// AUTH
+function doLogin() { closeModal(); showToast('Welcome back! You are now logged in.'); }
+function doSignup() { closeModal(); showToast('Account created! Welcome to APEX Rentals.'); }
+
+// PRICE CALC
+const prices = { 0: 85000, 1: 120000, 2: 65000, 3: 55000, 4: 70000, 5: 95000 };
+function calcPrice() {
+  const sel = document.getElementById('vehicle').selectedIndex;
+  const p = prices[sel] || 85000;
+  const p1 = document.getElementById('pickup').value;
+  const p2 = document.getElementById('dropoff').value;
+  let days = 1;
+  if (p1 && p2) {
+    const d = (new Date(p2) - new Date(p1)) / (1000 * 60 * 60 * 24);
+    if (d > 0) days = Math.round(d);
+  }
+  document.getElementById('daily').textContent = 'Rs. ' + p.toLocaleString();
+  document.getElementById('days').textContent = days + ' day' + (days > 1 ? 's' : '');
+  document.getElementById('total').textContent = 'Rs. ' + (p * days + 5000).toLocaleString();
+}
+
+function submitBooking() { showToast('Booking confirmed! Check your email for details.'); }
+function submitContact() { showToast('Message sent! We will reply within 24 hours.'); }
+
+// SCROLL REVEAL
+function initReveal() {
+  const els = document.querySelectorAll('.reveal');
+  const obs = new IntersectionObserver((entries) => {
+    entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+  }, { threshold: 0.1 });
+  els.forEach(el => obs.observe(el));
+}
+
+// ESC to close modal
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+</script>
+</body>
+</html>
